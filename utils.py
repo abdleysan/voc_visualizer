@@ -1,14 +1,17 @@
 import cv2
 import xmltodict 
 
+
 def get_bbox_from_obj(obj):
     b_box_dict = obj['bndbox']
     x1, y1, x2, y2 = get_dict_to_bbox(b_box_dict)
     class_name = obj['name']
     return ([x1, y1, x2, y2], class_name)
 
+
 def get_dict_to_bbox(bbox_dict: dict) -> list:
     return list(int(float(x)) for x in bbox_dict.values())
+
 
 def draw_bbox_from_obj(img, obj):
     [x1, y1, x2, y2], class_name = get_bbox_from_obj(obj)

@@ -24,8 +24,9 @@ if __name__ == '__main__':
     annotations_paths = list(annotations_dir.glob('*.xml'))
     
     class_names = {}
-    # for i in range(10):
-    for i in tqdm(range(len(images_paths))):
+    analysis_obj_bbox = []
+    for i in range(10):
+    #for i in tqdm(range(len(images_paths))):
         image_path = images_paths[i]
         image_name = image_path.name
 
@@ -36,16 +37,40 @@ if __name__ == '__main__':
         
         objects = get_objects_from_annotations(ann_path)
         for obj in objects:
-            coords, class_name_obj = get_bbox_from_obj(obj)
-
+            [x1, y1, x2, y2], class_name_obj = get_bbox_from_obj(obj)
+            
+            analysis_obj_bbox.append([image_name, 
+                                      round((x2-x1)/2, 2), 
+                                      round((y2-y1)/2, 2), 
+                                      x2-x1, 
+                                      y2-y1, 
+                                      class_name_obj])
         
-            class_names[class_name_obj] = class_names[class_name_obj]+1 if class_name_obj in class_names else 1
-            # class_names.append(class_name_obj)
+            #class_names[class_name_obj] = class_names[class_name_obj]+1 if class_name_obj in class_names else 1
+    
+    
+    df = pd.DataFrame(analysis_obj_bbox, columns=['file_name', 
+                                                  'x_center',
+                                                  'y_center',
+                                                  'widths',
+                                                  'heights',
+                                                  'class_name'])
+    print(df['x_center'].mean())
+    
 
             #save_path = save_dir / image_name
             #cv2.imwrite(str(save_path), img)
-    print(class_names)
 
-    h=plt.bar(class_names.keys(), class_names.values(), align='center')
-    plt.savefig('results/classes_distribution.png')
+    '''TODO 1) implement pandas dataframe base analytics
+    Create pandas dataframe and analyse each column
+
+    file_name | image_heigh | image_width | x_center | y_center | widths | heights | x_center_norm | y_center_norm | w_norm | h_norm | class_name
+
+    NOTE: get image size using https://github.com/shibukawa/imagesize_py
+
+    ''' 
+    # print(class_names)
+
+    # h=plt.bar(class_names.keys(), class_names.values(), align='center')
+    # plt.savefig('results/classes_distribution.png')
 
