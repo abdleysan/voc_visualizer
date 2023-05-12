@@ -9,6 +9,7 @@ import pandas as pd
 import cv2
 from pprint import pprint
 from utils import visualize_annotation, get_objects_from_annotations, get_bbox_from_obj
+import imagesize
 
 
 if __name__ == '__main__':
@@ -34,29 +35,53 @@ if __name__ == '__main__':
         ann_path = annotations_paths[i]
 
         #img = visualize_annotation(img_path, ann_path)
-        
+        image_width, image_height = imagesize.get(images_paths[i])
         objects = get_objects_from_annotations(ann_path)
         for obj in objects:
             [x1, y1, x2, y2], class_name_obj = get_bbox_from_obj(obj)
-            
+            w = x2-x1
+            h = y2-y1
+            c_x = x1+w/2
+            c_y = y1+h/2
             analysis_obj_bbox.append([image_name, 
-                                      round((x2-x1)/2, 2), 
-                                      round((y2-y1)/2, 2), 
-                                      x2-x1, 
-                                      y2-y1, 
+                                      image_width, 
+                                      image_height,
+                                      round(c_x, 3), 
+                                      round(c_y, 3), 
+                                      w, 
+                                      h, 
+                                      round(c_x/image_width, 4),
+                                      round(c_y/image_height, 4),
+                                      round(w/image_width, 4),
+                                      round(h/image_height, 4),
                                       class_name_obj])
         
             #class_names[class_name_obj] = class_names[class_name_obj]+1 if class_name_obj in class_names else 1
     
     
     df = pd.DataFrame(analysis_obj_bbox, columns=['file_name', 
+                                                  'image_heigh',
+                                                  'image_width',
                                                   'x_center',
                                                   'y_center',
                                                   'widths',
                                                   'heights',
+                                                  'x_center_norm',
+                                                  'y_center_norm',
+                                                  'w_norm',
+                                                  'h_norm',
                                                   'class_name'])
-    print(df['x_center'].mean())
     
+    # print(df)
+    # for i in range(len(analysis_obj_bbox)):
+    #     axis([-0.05,1.05,-0.05,1.05])
+    #     plt.scatter(analysis_obj_bbox[i][7], analysis_obj_bbox[i][8])
+    #     plt.savefig('results/analyses.png')
+    df1 = pd.DataFrame(analysis_obj_bbox)
+    plt.axis([0,1,0,1])
+    plt.scatter(df1[7],df1[8])
+    plt.legend(loc=2)
+    plt.show()
 
             #save_path = save_dir / image_name
             #cv2.imwrite(str(save_path), img)
